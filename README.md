@@ -31,7 +31,7 @@ pip freeze > requirements.txt
 ### Testing
 Check you don't break stuff
 ```
-
+python -m unittest
 ```
 
 ### Directory structure
