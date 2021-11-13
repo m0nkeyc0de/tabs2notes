@@ -8,6 +8,10 @@ import collections
 
 RE_INT = r"[0-9]+"
 
+# Tablature line guesswork
+TAB_CHAR = '-'
+TAB_CHAR_MIN_OCCURENCE = 5
+
 # MIDI values of base strings
 BASS_STRINGS = (28, 33, 38, 43)
 GUITAR_STRINGS = (40, 45, 50, 55, 59, 64)
@@ -70,26 +74,17 @@ class Tablature():
 
                 last_line_was_string = True
 
-                # Extract notes
-                group_frets[K_FR_DET][cur_string] = collections.OrderedDict()
-
-                for m in re.finditer(RE_INT, line):
-                    note_idx = m.start()
-                    fret = m.group()
-
-                    # WORKAROUND when a fret is like 7777777777777
-                    if fret.count(fret[0]) == len(fret):
-                        fret = fret[0]
-                    
+                # Extract notes from line
+                group_frets[K_FR_DET][cur_string] = Tablature.get_line_frets(line)
+                for note_idx in group_frets[K_FR_DET][cur_string]:
                     group_frets[K_FR_IDX].add(note_idx)
-                    group_frets[K_FR_DET][cur_string][note_idx] = int(fret)
 
             else:
                 if last_line_was_string: # end of line group
 
                     if last_string_count > 0: # it's at least the 2nd group
                         if last_string_count != cur_string: # problem
-                            raise RuntimeError("Inconsistent string count in file (line {current_line})")
+                            raise self.InconsistentTablature(f"Inconsistent string count in file (line {current_line})")
 
                         else: # everything's fine
                             last_string_count = cur_string
@@ -99,7 +94,12 @@ class Tablature():
                     
                     last_line_was_string = False
                     self.extracted_frets.append(group_frets)
-                   
+                    group_frets = {}
+
+        # Ensure last group is there
+        if group_frets:
+            self.extracted_frets.append(group_frets)
+
         # Store how many strings the instrument has
         self.strings_count = cur_string
 
@@ -116,7 +116,7 @@ class Tablature():
             self.strings_base_notes = list(GUITAR_STRINGS)
 
         else:
-            raise RuntimeError(f"Unable to do instrument guesswork with {self.strings_base_notes} strings")
+            raise self.InstrumentGuessworkFailed(f"Unable to do instrument guesswork with {self.strings_base_notes} strings")
 
         # Put notes in same order as tablature lines
         self.strings_base_notes.reverse()
@@ -151,4 +151,27 @@ class Tablature():
     def line_is_string(line):
         """Determines if current line is a string"""
         # TODO make it less guesswork
-        return line.count('-') > 5
+        return line.count(TAB_CHAR) > TAB_CHAR_MIN_OCCURENCE
+
+    class InconsistentTablature(Exception):
+        """Inconsistent tablature"""
+    
+    class InstrumentGuessworkFailed(Exception):
+        """Unable to find instrument"""
+
+    @staticmethod
+    def get_line_frets(line):
+        """Extract frets from line"""
+        frets = collections.OrderedDict()
+
+        for match in re.finditer(RE_INT, line):
+            note_idx = match.start()
+            fret = match.group()
+
+            # WORKAROUND when a fret is like 7777777777777
+            if fret.count(fret[0]) == len(fret):
+                fret = fret[0]
+            
+            frets[note_idx] = int(fret)
+        
+        return frets
