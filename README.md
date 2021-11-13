@@ -13,10 +13,11 @@ pip install -r requirements.txt
 
 ## Usage
 ```
-# Start venv
+# 1. Start venv
 python3 -m venv venv
 source venv/bin/activate
-# Run this file (and you'll get help)
+# 2. Put you tablatures as text files in tabs directory
+# 3. Run this file (and you'll get all the help you need)
 ./tabs2notes.py
 ```
 
@@ -26,3 +27,16 @@ source venv/bin/activate
 # 2. When you change Python libs
 pip freeze > requirements.txt
 ```
+
+### Testing
+Check you don't break stuff
+```
+
+```
+
+### Directory structure
+We have following directories to keep things neat:
+* src : all the Python modules
+* tabs : we look here for tablatures
+* tests : pretty obvious
+* venv : this project specific Python virtualenv
