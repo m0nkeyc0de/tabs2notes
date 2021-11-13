@@ -18,7 +18,7 @@ python3 -m venv venv
 source venv/bin/activate
 # 2. Put you tablatures as text files in tabs directory
 # 3. Run this file (and you'll get all the help you need)
-./tabs2notes.py
+./tabs2notes.py --help
 ```
 
 ## Development

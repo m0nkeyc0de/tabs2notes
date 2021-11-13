@@ -8,7 +8,7 @@ MIDI_NOTES_COUNT = 128
 SCALE_SIZE = 12
 
 # MIDI notes names is a mess, with negative (!) octave numbers but id depends...
-# Middle C is always note 60
+# Middle C (~264Hz) is always note 60 --> C5 in our setup
 # https://www.midi.org/forum/830-midi-octave-and-note-numbering-standard
 
 RE_NOTE_ENG = r"^[A-G][b#]?(10|[0-9])$" # English
@@ -48,6 +48,9 @@ NOTES_LANGUAGES = (
 
 class MusicNote():
     """All the notes stuff is in there"""
+    ENGLISH = IDX_ENG
+    GERMAN = IDX_DEU
+    LATIN = IDX_LAT
     
     # Helpers
     @staticmethod
