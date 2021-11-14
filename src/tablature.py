@@ -15,6 +15,7 @@ TAB_CHAR_MIN_OCCURENCE = 5
 # Dict keys
 K_FR_IDX = 'frets_indexes'
 K_FR_DET = 'frets_detail'
+K_FR_BLK = 'frets_block_idx'
 
 class Tablature():
     """Guitar tablature parsing"""
@@ -134,6 +135,7 @@ class Tablature():
             block_frets = {
                 K_FR_IDX : set(), # Fret indexes for all group lines
                 K_FR_DET : collections.OrderedDict(), # Fret indexes per line
+                K_FR_BLK : block_start_idx,
             }
 
             for str_idx, file_line in enumerate(self.file[block_start_idx:block_end_idx]):
@@ -161,28 +163,34 @@ class Tablature():
         strings_notes = list(self.strings_base_notes)
         strings_notes.reverse()
 
-        # Extract the real notes from frets positions
-        for fret_group in self.extracted_frets:
-            # All the notes of the current group
-            group_midi_notes = []
+        self._debug(f"Base strings MIDI notes: {strings_notes}", self.DEBUG_NOTES)
 
-            for note_idx in fret_group[K_FR_IDX]:
+        # Extract the real notes from frets positions
+        for block_frets in self.extracted_frets:
+            # All the notes of the current group
+            block_midi_notes = []
+
+            block_start_idx = block_frets[K_FR_BLK]
+
+            for note_idx in sorted(list(block_frets[K_FR_IDX])):
                 # All the notes at this position in the current group
-                line_midi_notes = []
+                string_midi_notes = []
                 
                 for string_idx in range(1, self.strings_count+1):
                     string_base_note = strings_notes[string_idx-1]
 
                     # Do we have a note at this position in the current line ?
-                    fret = fret_group[K_FR_DET][string_idx].get(note_idx)
+                    fret = block_frets[K_FR_DET][string_idx].get(note_idx)
 
-                    if fret: # There is a fret pressed at this position on this line                    
+                     # There is a fret pressed at this position on this line
+                    if fret is not None: # fret can be 0 !    
                         midi_note = string_base_note + fret
-                        line_midi_notes.append(midi_note)
+                        string_midi_notes.append(midi_note)
 
-                group_midi_notes.append(line_midi_notes)
+                block_midi_notes.append(string_midi_notes)
 
-            retval.append(group_midi_notes)
+            self._debug(f"Block {block_start_idx} MIDI notes: {block_midi_notes}", self.DEBUG_NOTES)
+            retval.append(block_midi_notes)
 
         return retval
 

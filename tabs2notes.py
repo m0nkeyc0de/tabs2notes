@@ -101,8 +101,7 @@ def main():
 
             # TODO this way of displaying chords isn't readable
             line_notes.append("+".join(chord_notes))
-
-        # TODO there are some extra-spaces but don't know why
+            
         print(" ".join(line_notes))
 
 if __name__ == "__main__":
