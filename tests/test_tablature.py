@@ -9,7 +9,7 @@ from src.tablature import Tablature
 class TablatureTest(unittest.TestCase):
     """Tablature testing"""
     
-    def test_line_is_string(self,):
+    def test_is_tablature_line(self,):
         """Guesswork to find tablature lines"""
         tablature_lines = [
             "g-------------------------------------------------------------------------------------",
@@ -17,7 +17,7 @@ class TablatureTest(unittest.TestCase):
             "A|-----------------------------------------------------8\-|"
         ]
         for line in tablature_lines:
-            self.assertTrue(Tablature.line_is_string(line))
+            self.assertTrue(Tablature.is_tablature_line(line))
 
         random_lines = [
             "",
@@ -25,7 +25,7 @@ class TablatureTest(unittest.TestCase):
             "add-some-dashes",
         ]
         for line in random_lines:
-            self.assertFalse(Tablature.line_is_string(line))
+            self.assertFalse(Tablature.is_tablature_line(line))
 
     def test_line_frets(self,):
         """Test line frets extraction"""
@@ -44,22 +44,22 @@ class TablatureTest(unittest.TestCase):
     def test_broken_tablatures(self,):
         """Weird tablatures stuff"""
 
-        tab = Tablature("tests/inconsistent_tablature.txt")
-        tab.load_file()
+        # Inconsistent tablature
         with self.assertRaises(Tablature.InconsistentTablature):
-            tab.parse()
+            Tablature("tests/tab_inconsistent.txt", Tablature.INST_GUITAR6)
 
-        tab = Tablature("tests/failed_instrument_guesswork.txt")
-        tab.load_file()
-        tab.parse()
-        with self.assertRaises(Tablature.InstrumentGuessworkFailed):
-            tab.midi_notes()
-            
+        # Wrong instrument for tablature
+        with self.assertRaises(Tablature.InstrumentBadStringCount):
+            Tablature("tests/tab_empty_guitar.txt", Tablature.INST_BASS4)
+    
+    def test_structure_parse(self,):
+        """Ensure we find all the line groups"""
+        tab = Tablature("tests/tab_empty_guitar.txt", Tablature.INST_GUITAR6)
+        self.assertEqual(3, len(tab.extracted_frets))
+
     def test_tab_style_01(self):
         """Tablature style 01"""
-        tab = Tablature("tests/tab_style1.txt")
-        tab.load_file()
-        tab.parse()
+        tab = Tablature("tests/tab_style1.txt", Tablature.INST_BASS4)
 
         # It's a bass tab
         self.assertEqual(4, tab.strings_count)
