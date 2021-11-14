@@ -1,6 +1,6 @@
 # Dev stuff
 *.pyc
-*.vscode/*
+.vscode/*
 # Don't track venv
 venv/*
 # Don't track tablatures directory but keep it with .gitkeep
